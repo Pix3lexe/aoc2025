@@ -25,19 +25,22 @@ def part_2(path):
 
     summ = 0
     for bank in banks:
-        nums = []
-        for offset in range(12):
-            index = np.argmax(bank[11 - offset : len(bank) - offset]) + offset
-            nums.append(bank[index])
+        num = ""
+        prev_max = -1
+        for offset in range(1, 13):
+            index = (
+                np.argmax(bank[prev_max + 1 : len(bank) - (12 - offset)]) + prev_max + 1
+            )
+            prev_max = index
+            num += str(bank[index])
 
-        num_str = "".join(nums)
-        summ += int(num_str)
+        summ += int(num)
 
     return summ
 
 
 if __name__ == "__main__":
-    ans = part_1("in.txt")
-    ans2 = part_2("in.txt")
+    ans = part_1("in/cur.in")
+    ans2 = part_2("in/cur.in")
     print(ans)
     print(ans2)

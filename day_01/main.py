@@ -38,7 +38,7 @@ def part_2(path):
 
 
 if __name__ == "__main__":
-    ans = part_1("../in/cur.in")
-    ans2 = part_2("../in/cur.in")
+    ans = part_1("in/cur.in")
+    ans2 = part_2("in/cur.in")
     print(ans)
     print(ans2)
