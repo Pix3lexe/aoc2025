@@ -1,15 +1,5 @@
 from collections import deque
-
-
-def in_bounds(coord, grid):
-    return 0 <= coord[0] < len(grid) and 0 <= coord[1] < len(grid[0])
-
-
-def show(grid):
-    for row in grid:
-        for c in row:
-            print(c, end="")
-        print()
+from functools import lru_cache
 
 
 def part_1(path):
@@ -18,11 +8,15 @@ def part_1(path):
         for line in f:
             grid.append([c for c in line])
 
+    ROWS, COLS = len(grid), len(grid[0])
     start = (0, 0)
-    for i in range(len(grid)):
-        for j in range(len(grid[0])):
+    for i in range(ROWS):
+        for j in range(COLS):
             if grid[i][j] == "S":
                 start = (i, j)
+
+    def in_bounds(i, j):
+        return 0 <= i < ROWS and 0 <= j < COLS
 
     queue = deque([start])
 
@@ -34,7 +28,7 @@ def part_1(path):
                 continue
             grid[i][j] = "|"
             next_i, next_j = i + 1, j
-            if not in_bounds((next_i, next_j), grid):
+            if not in_bounds(next_i, next_j):
                 continue
 
             if grid[next_i][next_j] == "|":
@@ -45,10 +39,10 @@ def part_1(path):
                 left = (next_i, j - 1)
                 right = (next_i, j + 1)
 
-                if in_bounds(left, grid) and grid[left[0]][left[1]] == ".":
+                if in_bounds(*left) and grid[left[0]][left[1]] == ".":
                     queue.append(left)
 
-                if in_bounds(right, grid) and grid[right[0]][right[1]] == ".":
+                if in_bounds(*right) and grid[right[0]][right[1]] == ".":
                     queue.append(right)
 
             else:
@@ -63,46 +57,39 @@ def part_2(path):
         for line in f:
             grid.append([c for c in line])
 
+    ROWS, COLS = len(grid), len(grid[0])
     start = (0, 0)
-    for i in range(len(grid)):
-        for j in range(len(grid[0])):
+    for i in range(ROWS):
+        for j in range(COLS):
             if grid[i][j] == "S":
                 start = (i, j)
 
-    final_positions = []
+    def in_bounds(i, j):
+        return 0 <= i < ROWS and 0 <= j < COLS
 
-    def dfs(start, visited):
-        queue = deque([start])
-        local_visited = visited.copy()
+    @lru_cache(None)
+    def count_paths(i, j):
+        ni, nj = i + 1, j
 
-        while queue:
-            i, j = queue.popleft()
-            next_i, next_j = i + 1, j
-            if not in_bounds((next_i, next_j), grid):
-                final_positions.append((next_i, next_j))
-                continue
+        if not in_bounds(ni, nj):
+            return 1
 
-            cell = grid[next_i][next_j]
-            if cell == "^":
-                left = (next_i, j - 1)
-                right = (next_i, j + 1)
+        cell = grid[ni][nj]
 
-                if in_bounds(left, grid) and left not in local_visited:
-                    new_local_visited = local_visited.copy()
-                    new_local_visited.add(left)
-                    dfs(left, new_local_visited)
+        if cell == "^":
+            total = 0
 
-                if in_bounds(right, grid) and right not in local_visited:
-                    new_local_visited = local_visited.copy()
-                    new_local_visited.add(right)
-                    dfs(right, new_local_visited)
-                return
+            if in_bounds(ni, nj - 1):
+                total += count_paths(ni, nj - 1)
 
-            else:
-                queue.append((next_i, next_j))
+            if in_bounds(ni, nj + 1):
+                total += count_paths(ni, nj + 1)
 
-    dfs(start, set())
-    return len(final_positions)
+            return total
+
+        return count_paths(ni, nj)
+
+    return count_paths(*start)
 
 
 if __name__ == "__main__":
